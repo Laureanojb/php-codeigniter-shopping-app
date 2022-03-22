@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:5.6
+    volumes:
+      - ./scripts/user.sql:/docker-entrypoint-initdb.d/user.sql
+      - ./db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: ciapp
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+
+  ciapp:
+    build: ./ciapp
+    volumes: 
+      - ./ciapp:/var/www/html/
+    depends_on:
+       - db
+    restart: always
+    links:
+      - db:mysql
+    ports:
+      - "8000:80"
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_ARBITRARY=1
+
+volumes:
+    db_data:
+        driver: local
